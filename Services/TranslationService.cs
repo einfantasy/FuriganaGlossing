@@ -12,7 +12,9 @@ namespace FuriganaGlossing.Services
     public interface ITranslationService
     {
         Task<string> TranslateAsync(string text);
+        Task<bool> CheckConnectionAsync();
     }
+
 
     public class TranslationService : ITranslationService
     {
@@ -66,6 +68,21 @@ namespace FuriganaGlossing.Services
             {
                 App.LogService.Log($"Translation Error: {ex.Message}", LogLevel.Error);
                 return "Translation failed.";
+            }
+        }
+
+        public async Task<bool> CheckConnectionAsync()
+        {
+            try
+            {
+                var config = await _configService.LoadConfigAsync();
+                var url = config.TranslationServerUrl + "/v1/models";
+                var response = await _httpClient.GetAsync(url);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
             }
         }
 

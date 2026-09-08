@@ -35,6 +35,12 @@ namespace FuriganaGlossing.ViewModels
         [ObservableProperty]
         private string _resultHtml;
 
+        [ObservableProperty]
+        private bool _isOcrServerConnected;
+
+        [ObservableProperty]
+        private bool _isTranslationServerConnected;
+
         public ReadOnlyObservableCollection<string> Logs => App.LogService.Logs;
 
         public MainViewModel(IConfigService configService)
@@ -43,6 +49,23 @@ namespace FuriganaGlossing.ViewModels
             _ocrService = new OcrService(configService);
             _furiganaService = new FuriganaService(configService);
             _translationService = new TranslationService(configService);
+
+            _ = StartConnectionCheckTimer();
+        }
+
+        private async Task StartConnectionCheckTimer()
+        {
+            while (true)
+            {
+                await UpdateConnectionStatusAsync();
+                await Task.Delay(TimeSpan.FromSeconds(4));
+            }
+        }
+
+        public async Task UpdateConnectionStatusAsync()
+        {
+            IsOcrServerConnected = await _ocrService.CheckConnectionAsync();
+            IsTranslationServerConnected = await _translationService.CheckConnectionAsync();
         }
 
         [RelayCommand]
@@ -105,7 +128,7 @@ namespace FuriganaGlossing.ViewModels
             // Translation (Below, Smaller)
             if (!string.IsNullOrEmpty(TranslationText))
             {
-                sb.Append($"<div style=\"font-size: 20px; color: #333; max-width: 800px; font-weight: normal;\">{TranslationText}</div>");
+                sb.Append($"<div style=\"font-size: 20px; color: #333; max-width: 800px; font-weight: normal; font-family: 'Google Sans';\">{TranslationText}</div>");
             }
             
             sb.Append("</body></html>");

@@ -14,7 +14,9 @@ namespace FuriganaGlossing.Services
     public interface IOcrService
     {
         Task<OcrResult> PerformOcrAsync(byte[] imageBytes);
+        Task<bool> CheckConnectionAsync();
     }
+
 
     public class OcrService : IOcrService
     {
@@ -79,6 +81,21 @@ namespace FuriganaGlossing.Services
             {
                 App.LogService.Log($"OCR Error: {ex.Message}", LogLevel.Error);
                 return new OcrResult();
+            }
+        }
+
+        public async Task<bool> CheckConnectionAsync()
+        {
+            try
+            {
+                var config = await _configService.LoadConfigAsync();
+                var url = config.OcrServerUrl + "/v1/models";
+                var response = await _httpClient.GetAsync(url);
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
             }
         }
 
