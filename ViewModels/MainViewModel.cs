@@ -105,7 +105,7 @@ namespace FuriganaGlossing.ViewModels
             // Translation (Below, Smaller)
             if (!string.IsNullOrEmpty(TranslationText))
             {
-                sb.Append($"<div style=\"font-size: 18px; color: #666; max-width: 800px;\">Translation:<br/><span style=\"font-weight: normal; color: #888; font-size: 16px;\">{TranslationText}</span></div>");
+                sb.Append($"<div style=\"font-size: 20px; color: #333; max-width: 800px; font-weight: normal;\">{TranslationText}</div>");
             }
             
             sb.Append("</body></html>");
