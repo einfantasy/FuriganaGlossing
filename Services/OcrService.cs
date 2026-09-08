@@ -31,6 +31,7 @@ namespace FuriganaGlossing.Services
         {
             var config = await _configService.LoadConfigAsync();
             var url = config.OcrServerUrl + "/v1/chat/completions";
+            App.LogService.Log($"Starting OCR request to {url}...", LogLevel.Info);
 
             try
             {
@@ -59,8 +60,13 @@ namespace FuriganaGlossing.Services
                 var llmResponse = await response.Content.ReadFromJsonAsync<LlmResponse>();
                 var content = llmResponse?.Choices?.FirstOrDefault()?.Message?.Content;
                 
-                if (string.IsNullOrEmpty(content)) return new OcrResult();
+                if (string.IsNullOrEmpty(content)) 
+                {
+                    App.LogService.Log("OCR returned empty content", LogLevel.Warning);
+                    return new OcrResult();
+                }
 
+                App.LogService.Log("OCR completed successfully", LogLevel.Info);
                 return new OcrResult
                 {
                     Lines = new List<OcrTextLine> 
@@ -71,7 +77,7 @@ namespace FuriganaGlossing.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"OCR Error: {ex.Message}");
+                App.LogService.Log($"OCR Error: {ex.Message}", LogLevel.Error);
                 return new OcrResult();
             }
         }

@@ -1,7 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FuriganaGlossing.Services
 {
@@ -13,7 +16,16 @@ namespace FuriganaGlossing.Services
 
     public class ProcessManagerService : IProcessManagerService
     {
-        private readonly List<Process> _managedProcesses = new List<Process>();
+        private Queue<Process> _managedProcesses = new Queue<Process>();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool AttachConsole(uint dwProcessId);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool FreeConsole();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool GenerateConsoleCtrlEvent(uint dwCtrlEvent, uint dwProcessGroupId);
 
         public void StartProcess(string command)
         {
@@ -23,8 +35,10 @@ namespace FuriganaGlossing.Services
             {
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = "cmd.exe",
-                    Arguments = $"/c {command}",
+                    //FileName = "cmd.exe",
+                    //Arguments = $"/c {command}",
+                    FileName = command.Split(" ")[0],
+                    Arguments = command.Replace(command.Split(" ")[0], ""),
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
@@ -34,29 +48,52 @@ namespace FuriganaGlossing.Services
                 var process = Process.Start(startInfo);
                 if (process != null)
                 {
-                    _managedProcesses.Add(process);
+                    process.OutputDataReceived += (s, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            App.LogService.Log(e.Data, LogLevel.Info);
+                        }
+                    };
+                    process.ErrorDataReceived += (s, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            App.LogService.Log(e.Data, LogLevel.Info);
+                        }
+                    };
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                    _managedProcesses.Enqueue(process);
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error starting process: {ex.Message}");
+                MessageBox.Show($"Error starting process: {ex.Message}");
             }
         }
 
         public void StopAll()
         {
-            foreach (var process in _managedProcesses)
+            while (_managedProcesses.Count > 0)
             {
+                var process = _managedProcesses.Dequeue();
                 try
                 {
                     if (!process.HasExited)
                     {
+                        //if (AttachConsole((uint)process.Id))
+                        //{
+                        //    GenerateConsoleCtrlEvent(0, 0);
+                        //    FreeConsole();
+                        //}
+
                         process.Kill();
                     }
                 }
+
                 catch { }
             }
-            _managedProcesses.Clear();
         }
     }
 }

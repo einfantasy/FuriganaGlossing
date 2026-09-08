@@ -31,6 +31,7 @@ namespace FuriganaGlossing.Services
 
             var config = await _configService.LoadConfigAsync();
             var url = config.TranslationServerUrl + "/v1/chat/completions";
+            App.LogService.Log($"Requesting translation from {url}...", LogLevel.Info);
 
             try
             {
@@ -56,11 +57,14 @@ namespace FuriganaGlossing.Services
                 response.EnsureSuccessStatusCode();
 
                 var llmResponse = await response.Content.ReadFromJsonAsync<LlmResponse>();
-                return llmResponse?.Choices?.FirstOrDefault()?.Message?.Content ?? string.Empty;
+                var result = llmResponse?.Choices?.FirstOrDefault()?.Message?.Content ?? string.Empty;
+                
+                App.LogService.Log("Translation completed successfully", LogLevel.Info);
+                return result;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Translation Error: {ex.Message}");
+                App.LogService.Log($"Translation Error: {ex.Message}", LogLevel.Error);
                 return "Translation failed.";
             }
         }

@@ -25,6 +25,11 @@ namespace FuriganaGlossing.Views
                     MessageBox.Show("Failed to save configuration. Please try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             });
+
+            WeakReferenceMessenger.Default.Register<ConfigWindow, CloseConfigWindowMessage>(this, (r, m) =>
+            {
+                this.Close();
+            });
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)

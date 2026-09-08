@@ -33,9 +33,12 @@ namespace FuriganaGlossing.Services
             var dicPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dic");
             if (!System.IO.Directory.Exists(dicPath))
             {
-                throw new System.IO.DirectoryNotFoundException($"UniDic directory not found at: {dicPath}");
+                var errorMsg = $"UniDic directory not found at: {dicPath}";
+                App.LogService.Log(errorMsg, LogLevel.Error);
+                throw new System.IO.DirectoryNotFoundException(errorMsg);
             }
 
+            App.LogService.Log($"Initializing MeCab with dictionary at {dicPath}...", LogLevel.Info);
             _tagger = MeCabTagger.Create(new MeCabParam(dicPath));
         }
 
@@ -43,6 +46,7 @@ namespace FuriganaGlossing.Services
         {
             if (string.IsNullOrEmpty(text)) return new List<FuriganaToken>();
 
+            App.LogService.Log("Analyzing text for furigana...", LogLevel.Info);
             await InitializeTaggerAsync();
 
             var tokens = new List<FuriganaToken>();
@@ -71,6 +75,7 @@ namespace FuriganaGlossing.Services
                 currentPos += node.Surface.Length;
             }
 
+            App.LogService.Log($"Furigana analysis completed. Found {tokens.Count} tokens.", LogLevel.Info);
             return tokens;
         }
 

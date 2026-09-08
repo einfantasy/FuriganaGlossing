@@ -14,6 +14,7 @@ using FuriganaGlossing.Services;
 using FuriganaGlossing.ViewModels;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Collections.Specialized;
 
 namespace FuriganaGlossing.Views
 {
@@ -31,7 +32,23 @@ namespace FuriganaGlossing.Views
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
             this.KeyDown += OnKeyDown;
             
+            ((INotifyCollectionChanged)_viewModel.Logs).CollectionChanged += OnLogsCollectionChanged;
+            
             InitializeWebView();
+        }
+
+        private void OnLogsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                if (LogListBox != null && e.NewItems != null && e.NewItems.Count > 0)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        LogListBox.ScrollIntoView(e.NewItems[0]);
+                    }));
+                }
+            }
         }
 
         private async void InitializeWebView()

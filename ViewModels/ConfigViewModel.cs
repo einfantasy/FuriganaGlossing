@@ -65,6 +65,7 @@ namespace FuriganaGlossing.ViewModels
         {
             _processManagerService.StartProcess(OcrStartCommand);
             _processManagerService.StartProcess(LlmStartCommand);
+            WeakReferenceMessenger.Default.Send(new CloseConfigWindowMessage());
         }
     }
 }
