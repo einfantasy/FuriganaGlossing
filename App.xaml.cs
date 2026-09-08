@@ -1,14 +1,22 @@
-﻿using System.Configuration;
-using System.Data;
-using System.Windows;
+﻿using System.Windows;
+using FuriganaGlossing.Services;
 
 namespace FuriganaGlossing
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
-    }
+        public static IProcessManagerService ProcessManager { get; private set; }
 
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            ProcessManager = new ProcessManagerService();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            ProcessManager?.StopAll();
+            base.OnExit(e);
+        }
+    }
 }

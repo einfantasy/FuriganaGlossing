@@ -39,6 +39,7 @@ namespace FuriganaGlossing.Views
             try
             {
                 await ResultWebView.EnsureCoreWebView2Async();
+                ResultWebView.CoreWebView2.Profile.PreferredColorScheme = Microsoft.Web.WebView2.Core.CoreWebView2PreferredColorScheme.Light;
             }
             catch (Exception ex)
             {
@@ -85,9 +86,9 @@ namespace FuriganaGlossing.Views
             }
         }
 
-        private void RenderOcrResults()
+        private void Window_Closed(object sender, EventArgs e)
         {
-            // No longer used since coordinates are unavailable.
+            Application.Current.Shutdown();
         }
     }
 }

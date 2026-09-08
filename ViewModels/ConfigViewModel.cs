@@ -12,27 +12,33 @@ namespace FuriganaGlossing.ViewModels
     public partial class ConfigViewModel : ObservableObject
     {
         private readonly IConfigService _configService;
+        private readonly IProcessManagerService _processManagerService;
+
+         [ObservableProperty]
+         private string _ocrServerUrl = string.Empty;
+ 
+         [ObservableProperty]
+         private string _translationServerUrl = string.Empty;
 
         [ObservableProperty]
-        private string _ocrServerUrl = string.Empty;
+        private string _ocrStartCommand = string.Empty;
 
         [ObservableProperty]
-        private string _ocrModel = string.Empty;
+        private string _llmStartCommand = string.Empty;
 
-        [ObservableProperty]
-        private string _translationServerUrl = string.Empty;
-
-        public ConfigViewModel(IConfigService configService)
+        public ConfigViewModel(IConfigService configService, IProcessManagerService processManagerService)
         {
             _configService = configService;
+            _processManagerService = processManagerService;
         }
 
         public async Task InitializeAsync()
         {
             var config = await _configService.LoadConfigAsync();
             OcrServerUrl = config.OcrServerUrl;
-            OcrModel = config.OcrModel;
             TranslationServerUrl = config.TranslationServerUrl;
+            OcrStartCommand = config.OcrStartCommand;
+            LlmStartCommand = config.LlmStartCommand;
         }
 
         [RelayCommand]
@@ -42,8 +48,9 @@ namespace FuriganaGlossing.ViewModels
             {
                 var config = await _configService.LoadConfigAsync();
                 config.OcrServerUrl = OcrServerUrl;
-                config.OcrModel = OcrModel;
                 config.TranslationServerUrl = TranslationServerUrl;
+                config.OcrStartCommand = OcrStartCommand;
+                config.LlmStartCommand = LlmStartCommand;
                 await _configService.SaveConfigAsync(config);
                 WeakReferenceMessenger.Default.Send(new SaveCompletedMessage(true));
             }
@@ -51,6 +58,13 @@ namespace FuriganaGlossing.ViewModels
             {
                 WeakReferenceMessenger.Default.Send(new SaveCompletedMessage(false));
             }
+        }
+
+        [RelayCommand]
+        private void StartServers()
+        {
+            _processManagerService.StartProcess(OcrStartCommand);
+            _processManagerService.StartProcess(LlmStartCommand);
         }
     }
 }

@@ -38,7 +38,7 @@ namespace FuriganaGlossing.Services
                 
                 var requestBody = new
                 {
-                    model = config.OcrModel,
+                    model = "general",
                     messages = new[]
                     {
                         new

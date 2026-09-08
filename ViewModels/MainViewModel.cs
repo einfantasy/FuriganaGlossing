@@ -45,7 +45,7 @@ namespace FuriganaGlossing.ViewModels
         [RelayCommand]
         private void OpenSettings()
         {
-            var configViewModel = new ConfigViewModel(_configService);
+            var configViewModel = new ConfigViewModel(_configService, App.ProcessManager);
             var configWindow = new ConfigWindow(configViewModel);
             
             configWindow.Owner = Application.Current.MainWindow;
