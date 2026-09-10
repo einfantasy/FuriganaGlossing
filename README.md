@@ -38,6 +38,8 @@ A .NET 8 WPF application designed to process Japanese text from images or input,
 ### Configuration
 
 You can configure the OCR and Translation server endpoints through the application's settings window.
+UniDic download link: https://cotonoha-dic.s3-ap-northeast-1.amazonaws.com/unidic-3.1.0.zip
+Please extract the contents of the zip file into the `dic` folder in the output directory.
 
 ---
 
@@ -81,3 +83,5 @@ You can configure the OCR and Translation server endpoints through the applicati
 ### 配置
 
 您可以通过程序的设置窗口配置 OCR 和翻译服务器的 API 端点。
+UniDic 下载链接: https://cotonoha-dic.s3-ap-northeast-1.amazonaws.com/unidic-3.1.0.zip
+请将 zip 文件的内容解压到输出目录中的 `dic` 文件夹里。
