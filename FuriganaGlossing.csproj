@@ -17,5 +17,41 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="C:\Users\einfa\.nuget\packages\mecab.dotnet\1.2.0\build\..\content\dic\char.bin">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="C:\Users\einfa\.nuget\packages\mecab.dotnet\1.2.0\build\..\content\dic\dicrc">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="C:\Users\einfa\.nuget\packages\mecab.dotnet\1.2.0\build\..\content\dic\matrix.bin">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="C:\Users\einfa\.nuget\packages\mecab.dotnet\1.2.0\build\..\content\dic\README.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="C:\Users\einfa\.nuget\packages\mecab.dotnet\1.2.0\build\..\content\dic\sys.dic">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="C:\Users\einfa\.nuget\packages\mecab.dotnet\1.2.0\build\..\content\dic\unk.dic">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
 

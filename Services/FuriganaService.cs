@@ -77,7 +77,14 @@ namespace FuriganaGlossing.Services
                 }
 
                 var features = node.Feature.Split(',');
-                string reading = ((features.Length >= 7 && features[6] != "*") ? features[7] : "");
+                string reading = string.Empty;
+                if (features.Length >= 7)
+                {
+                    if(features.Length <= 10)
+                        reading = (features[6] != "*") ? features[7] : "";
+                    else
+                        reading = (features[6] != "*") ? features[9] : "";
+                }
 
                 tokens.Add(new FuriganaToken
                 {
@@ -101,19 +108,13 @@ namespace FuriganaGlossing.Services
 
         private string KatakanaToHiragana(string katakana)
         {
-            StringBuilder stringBuilder = new StringBuilder();
-            foreach (char c in katakana)
-            {
-                if (c >= '゠' && c <= 'ヿ')
-                {
-                    stringBuilder.Append((char)(c - 12448 + 12352));
-                }
-                else
-                {
-                    stringBuilder.Append(c);
-                }
-            }
-            return stringBuilder.ToString();
+            if (string.IsNullOrEmpty(katakana)) return katakana;
+
+            return new string(katakana.Select(c =>
+                c >= '\u30A1' && c <= '\u30F6'
+                    ? (char)(c - 0x60)
+                    : c
+            ).ToArray());
         }
     }
 }
