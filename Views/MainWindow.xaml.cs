@@ -15,6 +15,7 @@ using FuriganaGlossing.ViewModels;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Collections.Specialized;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FuriganaGlossing.Views
 {
@@ -25,8 +26,7 @@ namespace FuriganaGlossing.Views
         public MainWindow()
         {
             InitializeComponent();
-            var configService = new ConfigService();
-            _viewModel = new MainViewModel(configService);
+            _viewModel = App.ServiceProvider.GetRequiredService<MainViewModel>();
             DataContext = _viewModel;
 
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;

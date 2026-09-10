@@ -43,12 +43,12 @@ namespace FuriganaGlossing.ViewModels
 
         public ReadOnlyObservableCollection<string> Logs => App.LogService.Logs;
 
-        public MainViewModel(IConfigService configService)
+        public MainViewModel(IConfigService configService, IOcrService ocrService, IFuriganaService furiganaService, ITranslationService translationService)
         {
             _configService = configService;
-            _ocrService = new OcrService(configService);
-            _furiganaService = new FuriganaService(configService);
-            _translationService = new TranslationService(configService);
+            _ocrService = ocrService;
+            _furiganaService = furiganaService;
+            _translationService = translationService;
 
             _ = StartConnectionCheckTimer();
         }

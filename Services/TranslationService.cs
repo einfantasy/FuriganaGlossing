@@ -19,12 +19,12 @@ namespace FuriganaGlossing.Services
     public class TranslationService : ITranslationService
     {
         private readonly IConfigService _configService;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public TranslationService(IConfigService configService)
+        public TranslationService(IConfigService configService, IHttpClientFactory httpClientFactory)
         {
             _configService = configService;
-            _httpClient = new HttpClient();
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<string> TranslateAsync(string text)
@@ -34,6 +34,8 @@ namespace FuriganaGlossing.Services
             var config = await _configService.LoadConfigAsync();
             var url = config.TranslationServerUrl + "/v1/chat/completions";
             App.LogService.Log($"Requesting translation from {url}...", LogLevel.Info);
+
+            var httpClient = _httpClientFactory.CreateClient();
 
             try
             {
@@ -55,7 +57,8 @@ namespace FuriganaGlossing.Services
                     }
                 };
 
-                var response = await _httpClient.PostAsJsonAsync(url, requestBody);
+                    var response = await httpClient.PostAsJsonAsync(url, requestBody);
+
                 response.EnsureSuccessStatusCode();
 
                 var llmResponse = await response.Content.ReadFromJsonAsync<LlmResponse>();
@@ -77,7 +80,8 @@ namespace FuriganaGlossing.Services
             {
                 var config = await _configService.LoadConfigAsync();
                 var url = config.TranslationServerUrl + "/v1/models";
-                var response = await _httpClient.GetAsync(url);
+                var httpClient = _httpClientFactory.CreateClient();
+                var response = await httpClient.GetAsync(url);
                 return response.IsSuccessStatusCode;
             }
             catch

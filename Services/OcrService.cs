@@ -21,12 +21,12 @@ namespace FuriganaGlossing.Services
     public class OcrService : IOcrService
     {
         private readonly IConfigService _configService;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public OcrService(IConfigService configService)
+        public OcrService(IConfigService configService, IHttpClientFactory httpClientFactory)
         {
             _configService = configService;
-            _httpClient = new HttpClient();
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<OcrResult> PerformOcrAsync(byte[] imageBytes)
@@ -34,6 +34,8 @@ namespace FuriganaGlossing.Services
             var config = await _configService.LoadConfigAsync();
             var url = config.OcrServerUrl + "/v1/chat/completions";
             App.LogService.Log($"Starting OCR request to {url}...", LogLevel.Info);
+
+            var httpClient = _httpClientFactory.CreateClient();
 
             try
             {
@@ -56,7 +58,8 @@ namespace FuriganaGlossing.Services
                     }
                 };
 
-                var response = await _httpClient.PostAsJsonAsync(url, requestBody);
+                    var response = await httpClient.PostAsJsonAsync(url, requestBody);
+
                 response.EnsureSuccessStatusCode();
 
                 var llmResponse = await response.Content.ReadFromJsonAsync<LlmResponse>();
@@ -90,7 +93,8 @@ namespace FuriganaGlossing.Services
             {
                 var config = await _configService.LoadConfigAsync();
                 var url = config.OcrServerUrl + "/v1/models";
-                var response = await _httpClient.GetAsync(url);
+                var httpClient = _httpClientFactory.CreateClient();
+                var response = await httpClient.GetAsync(url);
                 return response.IsSuccessStatusCode;
             }
             catch
