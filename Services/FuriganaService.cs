@@ -39,7 +39,22 @@ namespace FuriganaGlossing.Services
             }
 
             App.LogService.Log($"Initializing MeCab with dictionary at {dicPath}...", LogLevel.Info);
-            _tagger = MeCabTagger.Create(new MeCabParam(dicPath));
+
+            try
+            {
+                _tagger = MeCabTagger.Create(new MeCabParam(dicPath));
+                if (_tagger == null)
+                {
+                    throw new Exception("MeCabTagger initialization failed and returned null.");
+                }
+
+                App.LogService.Log("MeCab initialized successfully.", LogLevel.Info);
+            }
+            catch (Exception ex)
+            {
+                App.LogService.Log($"Failed to initialize MeCab: {ex.Message}", LogLevel.Error);
+                _tagger = null; // 确保状态重置
+            }
         }
 
         public async Task<List<FuriganaToken>> GetFuriganaAsync(string text)
