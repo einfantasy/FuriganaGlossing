@@ -1,8 +1,7 @@
-using System.Windows;
 using CommunityToolkit.Mvvm.Messaging;
-using FuriganaGlossing.ViewModels;
-using FuriganaGlossing.Services;
 using FuriganaGlossing.Messages;
+using FuriganaGlossing.ViewModels;
+using System.Windows;
 
 namespace FuriganaGlossing.Views
 {

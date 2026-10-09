@@ -1,13 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using FuriganaGlossing.Services;
-using FuriganaGlossing.Models;
-using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
 using FuriganaGlossing.Messages;
+using FuriganaGlossing.Models;
+using FuriganaGlossing.Services;
 using System.Text;
 
 namespace FuriganaGlossing.ViewModels

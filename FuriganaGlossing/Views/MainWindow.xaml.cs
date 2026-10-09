@@ -1,23 +1,14 @@
-using System;
-using System.IO;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using FuriganaGlossing.Services;
-using FuriganaGlossing.ViewModels;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using System.Collections.Specialized;
-using Microsoft.Extensions.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using FuriganaGlossing.Messages;
+using FuriganaGlossing.Services;
+using FuriganaGlossing.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace FuriganaGlossing.Views
 {
