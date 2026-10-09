@@ -10,9 +10,6 @@ namespace FuriganaGlossing
     {
         public static IServiceProvider ServiceProvider { get; private set; } = null!;
 
-        public static IProcessManagerService ProcessManager => ServiceProvider.GetRequiredService<IProcessManagerService>();
-        public static ILogService LogService => ServiceProvider.GetRequiredService<ILogService>();
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -28,6 +25,7 @@ namespace FuriganaGlossing
                     services.AddTransient<IOcrService, OcrService>();
                     services.AddTransient<ITranslationService, TranslationService>();
                     services.AddTransient<MainViewModel>();
+                    services.AddTransient<ConfigViewModel>();
                 })
                 .Build();
 
@@ -36,7 +34,7 @@ namespace FuriganaGlossing
 
         protected override void OnExit(ExitEventArgs e)
         {
-            ProcessManager?.StopAll();
+            ServiceProvider.GetRequiredService<IProcessManagerService>().StopAll();
             base.OnExit(e);
         }
     }

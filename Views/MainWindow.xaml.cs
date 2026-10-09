@@ -16,6 +16,8 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Collections.Specialized;
 using Microsoft.Extensions.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
+using FuriganaGlossing.Messages;
 
 namespace FuriganaGlossing.Views
 {
@@ -30,7 +32,7 @@ namespace FuriganaGlossing.Views
             _viewModel = App.ServiceProvider.GetRequiredService<MainViewModel>();
             DataContext = _viewModel;
 
-            _logPresenter = new LogPresenter(App.LogService, Application.Current.Dispatcher);
+            _logPresenter = new LogPresenter(App.ServiceProvider.GetRequiredService<ILogService>(), Application.Current.Dispatcher);
             LogListBox.ItemsSource = _logPresenter.Logs;
             _logPresenter.Logs.CollectionChanged += OnLogsCollectionChanged;
 
@@ -38,8 +40,18 @@ namespace FuriganaGlossing.Views
             this.KeyDown += OnKeyDown;
             
             InitializeWebView();
+            WeakReferenceMessenger.Default.Register<MainWindow, OpenSettingsRequestedMessage>(this, (r, m) => OpenSettingsWindow());
         }
 
+        private void OpenSettingsWindow()
+        {
+            var configViewModel = App.ServiceProvider.GetRequiredService<ConfigViewModel>();
+            var configWindow = new ConfigWindow(configViewModel);
+
+            configWindow.Owner = this;
+            configWindow.Activated += async (s, e) => await configViewModel.InitializeAsync();
+            configWindow.ShowDialog();
+        }
         private void OnLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)

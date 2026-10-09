@@ -2,22 +2,22 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
-using System.Windows;
 using System.Threading.Tasks;
 using FuriganaGlossing.Services;
 using FuriganaGlossing.Models;
-using FuriganaGlossing.Views;
 using System.Linq;
+using CommunityToolkit.Mvvm.Messaging;
+using FuriganaGlossing.Messages;
 using System.Text;
 
 namespace FuriganaGlossing.ViewModels
 {
     public partial class MainViewModel : ObservableObject
     {
-        private readonly IConfigService _configService;
         private readonly IOcrService _ocrService;
         private readonly IFuriganaService _furiganaService;
         private readonly ITranslationService _translationService;
+        private readonly ILogService _logService;
 
         [ObservableProperty]
         private string _ocrText = string.Empty;
@@ -39,13 +39,15 @@ namespace FuriganaGlossing.ViewModels
 
         [ObservableProperty]
         private bool _isTranslationServerConnected;
+        [ObservableProperty]
+        private bool _isProcessing;
 
-        public MainViewModel(IConfigService configService, IOcrService ocrService, IFuriganaService furiganaService, ITranslationService translationService)
+        public MainViewModel(IOcrService ocrService, IFuriganaService furiganaService, ITranslationService translationService, ILogService logService)
         {
-            _configService = configService;
             _ocrService = ocrService;
             _furiganaService = furiganaService;
             _translationService = translationService;
+            _logService = logService;
 
             _ = StartConnectionCheckTimer();
         }
@@ -68,31 +70,39 @@ namespace FuriganaGlossing.ViewModels
         [RelayCommand]
         private void OpenSettings()
         {
-            var configViewModel = new ConfigViewModel(_configService, App.ProcessManager);
-            var configWindow = new ConfigWindow(configViewModel);
-            
-            configWindow.Owner = Application.Current.MainWindow;
-            configWindow.Activated += async (s, e) => await configViewModel.InitializeAsync();
-            configWindow.ShowDialog();
+            WeakReferenceMessenger.Default.Send(new OpenSettingsRequestedMessage());
         }
 
         public async Task ProcessImageAsync(byte[] imageBytes)
         {
-            // 1. Perform OCR
-            OcrResults = await _ocrService.PerformOcrAsync(imageBytes);
-            
-            // Combine all lines into one text for processing
-            string fullText = string.Join(Environment.NewLine, OcrResults.Lines.ConvertAll(l => l.Text));
-            OcrText = fullText;
+            IsProcessing = true;
+            try
+            {
+                // 1. Perform OCR
+                OcrResults = await _ocrService.PerformOcrAsync(imageBytes);
 
-            // 2. Get Furigana
-            FuriganaTokens = await _furiganaService.GetFuriganaAsync(fullText);
+                // Combine all lines into one text for processing
+                string fullText = string.Join(Environment.NewLine, OcrResults.Lines.ConvertAll(l => l.Text));
+                OcrText = fullText;
 
-            // 3. Get Translation
-            TranslationText = await _translationService.TranslateAsync(fullText);
+                // 2. Get Furigana
+                FuriganaTokens = await _furiganaService.GetFuriganaAsync(fullText);
 
-            // 4. Generate HTML for WebView2
-            ResultHtml = GenerateResultHtml();
+                // 3. Get Translation
+                TranslationText = await _translationService.TranslateAsync(fullText);
+
+                // 4. Generate HTML for WebView2
+                ResultHtml = GenerateResultHtml();
+            }
+            catch (Exception ex)
+            {
+                _logService.Log($"Image processing failed: {ex.Message}", LogLevel.Error);
+                throw;
+            }
+            finally
+            {
+                IsProcessing = false;
+            }
         }
 
         private string GenerateResultHtml()
