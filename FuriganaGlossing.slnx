@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="FuriganaGlossing.csproj" />
+  <Project Path="FuriganaGlossing.Core\FuriganaGlossing.Core.csproj" />
+  <Project Path="FuriganaGlossing\FuriganaGlossing.csproj" />
 </Solution>
