@@ -1,4 +1,4 @@
-﻿using FuriganaGlossing.Models;
+using FuriganaGlossing.Models;
 using MeCab;
 using System;
 using System.Collections.Generic;
@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FuriganaGlossing.Services
 {
@@ -19,41 +17,46 @@ namespace FuriganaGlossing.Services
     public class FuriganaService : IFuriganaService
     {
         private readonly IConfigService _configService;
-        private MeCabTagger _tagger;
+        private readonly ILogService _logService;
+        private MeCabTagger? _tagger;
 
-        public FuriganaService(IConfigService configService)
+        public FuriganaService(IConfigService configService, ILogService logService)
         {
             _configService = configService;
+            _logService = logService;
         }
 
-        private async Task InitializeTaggerAsync()
+        private async Task<MeCabTagger?> InitializeTaggerAsync()
         {
-            if (_tagger != null) return;
+            if (_tagger != null) return _tagger;
 
             var dicPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dic");
             if (!System.IO.Directory.Exists(dicPath))
             {
                 var errorMsg = $"UniDic directory not found at: {dicPath}";
-                App.LogService.Log(errorMsg, LogLevel.Error);
+                _logService.Log(errorMsg, LogLevel.Error);
                 throw new System.IO.DirectoryNotFoundException(errorMsg);
             }
 
-            App.LogService.Log($"Initializing MeCab with dictionary at {dicPath}...", LogLevel.Info);
+            _logService.Log($"Initializing MeCab with dictionary at {dicPath}...", LogLevel.Info);
 
             try
             {
-                _tagger = MeCabTagger.Create(new MeCabParam(dicPath));
-                if (_tagger == null)
+                var tagger = MeCabTagger.Create(new MeCabParam(dicPath));
+                if (tagger == null)
                 {
                     throw new Exception("MeCabTagger initialization failed and returned null.");
                 }
 
-                App.LogService.Log("MeCab initialized successfully.", LogLevel.Info);
+                _tagger = tagger;
+                _logService.Log("MeCab initialized successfully.", LogLevel.Info);
+                return tagger;
             }
             catch (Exception ex)
             {
-                App.LogService.Log($"Failed to initialize MeCab: {ex.Message}", LogLevel.Error);
+                _logService.Log($"Failed to initialize MeCab: {ex.Message}", LogLevel.Error);
                 _tagger = null; // 确保状态重置
+                return null;
             }
         }
 
@@ -61,11 +64,16 @@ namespace FuriganaGlossing.Services
         {
             if (string.IsNullOrEmpty(text)) return new List<FuriganaToken>();
 
-            App.LogService.Log("Analyzing text for furigana...", LogLevel.Info);
-            await InitializeTaggerAsync();
+            _logService.Log("Analyzing text for furigana...", LogLevel.Info);
+            var tagger = await InitializeTaggerAsync();
+            if (tagger == null)
+            {
+                _logService.Log("Furigana analysis failed: MeCab not initialized.", LogLevel.Error);
+                throw new InvalidOperationException("Furigana analysis failed: MeCab not initialized.");
+            }
 
             var tokens = new List<FuriganaToken>();
-            var nodes = _tagger.ParseToNodes(text);
+            var nodes = tagger.ParseToNodes(text);
             int currentPos = 0;
 
             foreach (var node in nodes)
@@ -97,7 +105,7 @@ namespace FuriganaGlossing.Services
                 currentPos += node.Surface.Length;
             }
 
-            App.LogService.Log($"Furigana analysis completed. Found {tokens.Count} tokens.", LogLevel.Info);
+            _logService.Log($"Furigana analysis completed. Found {tokens.Count} tokens.", LogLevel.Info);
             return tokens;
         }
 

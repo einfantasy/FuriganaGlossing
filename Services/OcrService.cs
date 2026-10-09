@@ -22,18 +22,20 @@ namespace FuriganaGlossing.Services
     {
         private readonly IConfigService _configService;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogService _logService;
 
-        public OcrService(IConfigService configService, IHttpClientFactory httpClientFactory)
+        public OcrService(IConfigService configService, IHttpClientFactory httpClientFactory, ILogService logService)
         {
             _configService = configService;
             _httpClientFactory = httpClientFactory;
+            _logService = logService;
         }
 
         public async Task<OcrResult> PerformOcrAsync(byte[] imageBytes)
         {
             var config = await _configService.LoadConfigAsync();
             var url = config.OcrServerUrl + "/v1/chat/completions";
-            App.LogService.Log($"Starting OCR request to {url}...", LogLevel.Info);
+            _logService.Log($"Starting OCR request to {url}...", LogLevel.Info);
 
             var httpClient = _httpClientFactory.CreateClient();
 
@@ -67,11 +69,11 @@ namespace FuriganaGlossing.Services
                 
                 if (string.IsNullOrEmpty(content)) 
                 {
-                    App.LogService.Log("OCR returned empty content", LogLevel.Warning);
+                    _logService.Log("OCR returned empty content", LogLevel.Warning);
                     return new OcrResult();
                 }
 
-                App.LogService.Log("OCR completed successfully", LogLevel.Info);
+                _logService.Log("OCR completed successfully", LogLevel.Info);
                 return new OcrResult
                 {
                     Lines = new List<OcrTextLine> 
@@ -82,7 +84,7 @@ namespace FuriganaGlossing.Services
             }
             catch (Exception ex)
             {
-                App.LogService.Log($"OCR Error: {ex.Message}", LogLevel.Error);
+                _logService.Log($"OCR Error: {ex.Message}", LogLevel.Error);
                 return new OcrResult();
             }
         }
@@ -106,19 +108,19 @@ namespace FuriganaGlossing.Services
         private class LlmResponse
         {
             [JsonPropertyName("choices")]
-            public List<LlmChoice> Choices { get; set; }
+            public List<LlmChoice>? Choices { get; set; }
         }
 
         private class LlmChoice
         {
             [JsonPropertyName("message")]
-            public LlmMessage Message { get; set; }
+            public LlmMessage? Message { get; set; }
         }
 
         private class LlmMessage
         {
             [JsonPropertyName("content")]
-            public string Content { get; set; }
+            public string? Content { get; set; }
         }
     }
 }

@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FuriganaGlossing.Models;
 using FuriganaGlossing.Services;
 using FuriganaGlossing.Messages;
+using System.Windows;
 
 namespace FuriganaGlossing.ViewModels
 {
@@ -63,8 +64,16 @@ namespace FuriganaGlossing.ViewModels
         [RelayCommand]
         private void StartServers()
         {
-            _processManagerService.StartProcess(OcrStartCommand);
-            _processManagerService.StartProcess(LlmStartCommand);
+            try
+            {
+                _processManagerService.StartProcess(OcrStartCommand);
+                _processManagerService.StartProcess(LlmStartCommand);
+            }
+            catch (ProcessStartException ex)
+            {
+                MessageBox.Show($"Error starting process: {ex.Message}");
+            }
+
             WeakReferenceMessenger.Default.Send(new CloseConfigWindowMessage());
         }
     }

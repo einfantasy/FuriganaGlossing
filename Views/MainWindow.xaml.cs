@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -22,6 +22,7 @@ namespace FuriganaGlossing.Views
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _viewModel;
+        private readonly LogPresenter _logPresenter;
 
         public MainWindow()
         {
@@ -29,15 +30,17 @@ namespace FuriganaGlossing.Views
             _viewModel = App.ServiceProvider.GetRequiredService<MainViewModel>();
             DataContext = _viewModel;
 
+            _logPresenter = new LogPresenter(App.LogService, Application.Current.Dispatcher);
+            LogListBox.ItemsSource = _logPresenter.Logs;
+            _logPresenter.Logs.CollectionChanged += OnLogsCollectionChanged;
+
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
             this.KeyDown += OnKeyDown;
-            
-            ((INotifyCollectionChanged)_viewModel.Logs).CollectionChanged += OnLogsCollectionChanged;
             
             InitializeWebView();
         }
 
-        private void OnLogsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
@@ -64,30 +67,36 @@ namespace FuriganaGlossing.Views
             }
         }
 
-        private void OnKeyDown(object sender, KeyEventArgs e)
+        private async void OnKeyDown(object? sender, KeyEventArgs e)
         {
             if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
-                CaptureClipboardImage();
+                await CaptureClipboardImageAsync();
             }
         }
 
-        private void CaptureClipboardImage()
+        private async Task CaptureClipboardImageAsync()
         {
-            if (Clipboard.ContainsImage())
+            try
             {
+                if (!Clipboard.ContainsImage()) return;
+
                 var image = Clipboard.GetImage();
                 using (var ms = new MemoryStream())
                 {
                     var encoder = new PngBitmapEncoder();
                     encoder.Frames.Add(BitmapFrame.Create(image));
                     encoder.Save(ms);
-                    _viewModel.ProcessImageAsync(ms.ToArray());
+                    await _viewModel.ProcessImageAsync(ms.ToArray());
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Image processing failed: {ex.Message}");
             }
         }
 
-        private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(MainViewModel.ResultHtml))
             {

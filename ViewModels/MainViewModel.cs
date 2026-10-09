@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Windows;
 using System.Threading.Tasks;
 using FuriganaGlossing.Services;
@@ -21,27 +20,25 @@ namespace FuriganaGlossing.ViewModels
         private readonly ITranslationService _translationService;
 
         [ObservableProperty]
-        private string _ocrText;
+        private string _ocrText = string.Empty;
 
         [ObservableProperty]
-        private string _translationText;
+        private string _translationText = string.Empty;
 
         [ObservableProperty]
-        private OcrResult _ocrResults;
+        private OcrResult _ocrResults = new();
 
         [ObservableProperty]
-        private List<FuriganaToken> _furiganaTokens;
+        private List<FuriganaToken> _furiganaTokens = new();
 
         [ObservableProperty]
-        private string _resultHtml;
+        private string _resultHtml = string.Empty;
 
         [ObservableProperty]
         private bool _isOcrServerConnected;
 
         [ObservableProperty]
         private bool _isTranslationServerConnected;
-
-        public ReadOnlyObservableCollection<string> Logs => App.LogService.Logs;
 
         public MainViewModel(IConfigService configService, IOcrService ocrService, IFuriganaService furiganaService, ITranslationService translationService)
         {
@@ -105,7 +102,7 @@ namespace FuriganaGlossing.ViewModels
             
             // Japanese original text and furigana (Center, Large)
             sb.Append("<div style=\"font-size: 40px; color: #000; margin-bottom: 40px;\">");
-            if (FuriganaTokens != null && FuriganaTokens.Any())
+            if (FuriganaTokens.Any())
             {
                 foreach (var token in FuriganaTokens)
                 {

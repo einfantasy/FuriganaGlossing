@@ -1,10 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace FuriganaGlossing.Services
 {
@@ -16,16 +12,13 @@ namespace FuriganaGlossing.Services
 
     public class ProcessManagerService : IProcessManagerService
     {
-        private Queue<Process> _managedProcesses = new Queue<Process>();
+        private readonly ILogService _logService;
+        private readonly Queue<Process> _managedProcesses = new Queue<Process>();
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool AttachConsole(uint dwProcessId);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool FreeConsole();
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool GenerateConsoleCtrlEvent(uint dwCtrlEvent, uint dwProcessGroupId);
+        public ProcessManagerService(ILogService logService)
+        {
+            _logService = logService;
+        }
 
         public void StartProcess(string command)
         {
@@ -52,14 +45,14 @@ namespace FuriganaGlossing.Services
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
-                            App.LogService.Log(e.Data, LogLevel.Info);
+                            _logService.Log(e.Data, LogLevel.Info);
                         }
                     };
                     process.ErrorDataReceived += (s, e) =>
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
-                            App.LogService.Log(e.Data, LogLevel.Info);
+                            _logService.Log(e.Data, LogLevel.Info);
                         }
                     };
                     process.BeginOutputReadLine();
@@ -69,7 +62,8 @@ namespace FuriganaGlossing.Services
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error starting process: {ex.Message}");
+                _logService.Log($"Error starting process: {ex.Message}", LogLevel.Error);
+                throw new ProcessStartException($"Error starting process: {ex.Message}", ex);
             }
         }
 
@@ -82,17 +76,12 @@ namespace FuriganaGlossing.Services
                 {
                     if (!process.HasExited)
                     {
-                        //if (AttachConsole((uint)process.Id))
-                        //{
-                        //    GenerateConsoleCtrlEvent(0, 0);
-                        //    FreeConsole();
-                        //}
-
                         process.Kill();
                     }
                 }
-
-                catch { }
+                catch
+                {
+                }
             }
         }
     }

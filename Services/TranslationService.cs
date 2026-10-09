@@ -20,11 +20,13 @@ namespace FuriganaGlossing.Services
     {
         private readonly IConfigService _configService;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogService _logService;
 
-        public TranslationService(IConfigService configService, IHttpClientFactory httpClientFactory)
+        public TranslationService(IConfigService configService, IHttpClientFactory httpClientFactory, ILogService logService)
         {
             _configService = configService;
             _httpClientFactory = httpClientFactory;
+            _logService = logService;
         }
 
         public async Task<string> TranslateAsync(string text)
@@ -33,7 +35,7 @@ namespace FuriganaGlossing.Services
 
             var config = await _configService.LoadConfigAsync();
             var url = config.TranslationServerUrl + "/v1/chat/completions";
-            App.LogService.Log($"Requesting translation from {url}...", LogLevel.Info);
+            _logService.Log($"Requesting translation from {url}...", LogLevel.Info);
 
             var httpClient = _httpClientFactory.CreateClient();
 
@@ -64,12 +66,12 @@ namespace FuriganaGlossing.Services
                 var llmResponse = await response.Content.ReadFromJsonAsync<LlmResponse>();
                 var result = llmResponse?.Choices?.FirstOrDefault()?.Message?.Content ?? string.Empty;
                 
-                App.LogService.Log("Translation completed successfully", LogLevel.Info);
+                _logService.Log("Translation completed successfully", LogLevel.Info);
                 return result;
             }
             catch (Exception ex)
             {
-                App.LogService.Log($"Translation Error: {ex.Message}", LogLevel.Error);
+                _logService.Log($"Translation Error: {ex.Message}", LogLevel.Error);
                 return "Translation failed.";
             }
         }
@@ -93,19 +95,19 @@ namespace FuriganaGlossing.Services
         private class LlmResponse
         {
             [JsonPropertyName("choices")]
-            public List<LlmChoice> Choices { get; set; }
+            public List<LlmChoice>? Choices { get; set; }
         }
 
         private class LlmChoice
         {
             [JsonPropertyName("message")]
-            public LlmMessage Message { get; set; }
+            public LlmMessage? Message { get; set; }
         }
 
         private class LlmMessage
         {
             [JsonPropertyName("content")]
-            public string Content { get; set; }
+            public string? Content { get; set; }
         }
     }
 }

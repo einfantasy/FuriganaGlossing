@@ -1,7 +1,7 @@
 using System;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Windows;
+using System.Collections;
+using System.Collections.Concurrent;
+using FuriganaGlossing.Models;
 
 namespace FuriganaGlossing.Services
 {
@@ -16,43 +16,47 @@ namespace FuriganaGlossing.Services
     public interface ILogService
     {
         void Log(string message, LogLevel level = LogLevel.Info);
-        ReadOnlyObservableCollection<string> Logs { get; }
+        IReadOnlyCollection<LogEntry> Logs { get; }
         void Clear();
+        event EventHandler<LogEntry>? EntryAdded;
     }
 
     public class LogService : ILogService
     {
-        private readonly ObservableCollection<string> _logs = new ObservableCollection<string>();
-        public ReadOnlyObservableCollection<string> Logs { get; }
+        private const int MaxLogCount = 1000;
 
-        public LogService()
-        {
-            Logs = new ReadOnlyObservableCollection<string>(_logs);
-        }
+        private readonly object _lock = new();
+        private readonly ConcurrentQueue<LogEntry> _entries = new();
+
+        public IReadOnlyCollection<LogEntry> Logs => _entries;
+
+        public event EventHandler<LogEntry>? EntryAdded;
 
         public void Log(string message, LogLevel level = LogLevel.Info)
         {
-            string timestamp = DateTime.Now.ToString("HH:mm:ss");
-            string formattedMessage = $"[{timestamp}] [{level}] {message}";
+            var entry = new LogEntry(DateTime.Now, level, message);
 
-            // Ensure we update the collection on the UI thread
-            Application.Current.Dispatcher.Invoke(() =>
+            lock (_lock)
             {
-                _logs.Add(formattedMessage);
-                // Optional: limit the number of logs to prevent memory issues
-                if (_logs.Count > 1000)
+                _entries.Enqueue(entry);
+                while (_entries.Count > MaxLogCount)
                 {
-                    _logs.RemoveAt(0);
+                    _entries.TryDequeue(out _);
                 }
-            });
+            }
+
+            EntryAdded?.Invoke(this, entry);
         }
 
         public void Clear()
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            lock (_lock)
             {
-                _logs.Clear();
-            });
+                while (_entries.TryDequeue(out _))
+                {
+                    // drain
+                }
+            }
         }
     }
 }

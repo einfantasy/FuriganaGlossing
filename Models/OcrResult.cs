@@ -9,7 +9,7 @@ namespace FuriganaGlossing.Models
 
     public class OcrTextLine
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
         public Rect BoundingBox { get; set; }
     }
 

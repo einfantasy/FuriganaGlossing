@@ -19,7 +19,7 @@
 
         <wv2:WebView2 x:Name="ResultWebView" Grid.Row="1" Margin="5"/>
 
-        <ListBox x:Name="LogListBox" Grid.Row="2" ItemsSource="{Binding Logs}" 
+        <ListBox x:Name="LogListBox" Grid.Row="2" 
                  Background="#f0f0f0" Foreground="#333" 
                  FontSize="12" FontFamily="Consolas"
                  Margin="5" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
