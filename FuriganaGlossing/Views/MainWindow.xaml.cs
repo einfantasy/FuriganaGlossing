@@ -26,10 +26,11 @@ namespace FuriganaGlossing.Views
             _logPresenter = new LogPresenter(App.ServiceProvider.GetRequiredService<ILogService>(), Application.Current.Dispatcher);
             LogListBox.ItemsSource = _logPresenter.Logs;
             _logPresenter.Logs.CollectionChanged += OnLogsCollectionChanged;
+            UpdateLogCount();
 
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
             this.KeyDown += OnKeyDown;
-            
+
             InitializeWebView();
             WeakReferenceMessenger.Default.Register<MainWindow, OpenSettingsRequestedMessage>(this, (r, m) => OpenSettingsWindow());
         }
@@ -43,8 +44,20 @@ namespace FuriganaGlossing.Views
             configWindow.Activated += async (s, e) => await configViewModel.InitializeAsync();
             configWindow.ShowDialog();
         }
+
+        private void UpdateLogCount()
+        {
+            LogCountText.Text = $"({_logPresenter.Logs.Count})";
+        }
+
+        private async void PasteImageButton_Click(object sender, RoutedEventArgs e)
+        {
+            await CaptureClipboardImageAsync();
+        }
+
         private void OnLogsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
+            UpdateLogCount();
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
                 if (LogListBox != null && e.NewItems != null && e.NewItems.Count > 0)

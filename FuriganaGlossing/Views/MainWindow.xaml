@@ -6,31 +6,80 @@
         xmlns:local="clr-namespace:FuriganaGlossing.Views"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800" Closed="Window_Closed">
+        Title="Furigana Glossing"
+        Height="600" Width="800"
+        MinWidth="780" MinHeight="540"
+        Background="{StaticResource pageBg}"
+        Closed="Window_Closed">
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="48"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="120"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="28"/>
         </Grid.RowDefinitions>
 
-        <Button Content="Settings" Grid.Row="0" Command="{Binding OpenSettingsCommand}" Margin="0,10,10,10" HorizontalAlignment="Right"/>
+        <Border Grid.Row="0" Background="{StaticResource surface}"
+                BorderBrush="{StaticResource border}" BorderThickness="0,0,0,1">
+            <Grid Margin="16 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="PasteImageButton" Content="Paste Image (Ctrl+V)"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Click="PasteImageButton_Click"/>
+                    <Button Content="Settings" Command="{Binding OpenSettingsCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}" Margin="8 0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-        <wv2:WebView2 x:Name="ResultWebView" Grid.Row="1" Margin="5"/>
+        <wv2:WebView2 x:Name="ResultWebView" Grid.Row="1" Margin="0"/>
 
-        <ListBox x:Name="LogListBox" Grid.Row="2" 
-                 Background="#f0f0f0" Foreground="#333" 
-                 FontSize="12" FontFamily="Consolas"
-                 Margin="5" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+        <Border Grid.Row="2" Background="{StaticResource surface}"
+                BorderBrush="{StaticResource border}" BorderThickness="0,1,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="100"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{StaticResource surface}"
+                        BorderBrush="{StaticResource border}" BorderThickness="0,0,0,1"
+                        Padding="12 4">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Log" FontFamily="{StaticResource fontFamilyUI}"
+                                   FontSize="{StaticResource fontSizeLabel}"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource textSecondary}"/>
+                        <TextBlock x:Name="LogCountText" Text="(0)"
+                                   FontFamily="{StaticResource fontFamilyUI}"
+                                   FontSize="{StaticResource fontSizeCaption}"
+                                   Foreground="{StaticResource textMuted}"
+                                   VerticalAlignment="Center" Margin="6 0 0 0"/>
+                    </StackPanel>
+                </Border>
+                <ListBox x:Name="LogListBox" Grid.Row="1"
+                         Background="{StaticResource surface}"
+                         BorderThickness="0" BorderBrush="{StaticResource border}"
+                         Foreground="{StaticResource textPrimary}"
+                         FontSize="{StaticResource fontSizeLog}"
+                         FontFamily="{StaticResource fontFamilyLog}"
+                         Margin="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+        </Border>
 
-        <StatusBar Grid.Row="3" Background="#eee" BorderBrush="#ccc" BorderThickness="0,1,0,0">
+        <StatusBar Grid.Row="3" Background="{StaticResource surface}"
+                   BorderBrush="{StaticResource border}" BorderThickness="0,1,0,0">
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0"/>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
-            
             <Ellipse Width="10" Height="10" Margin="0,0,5,0">
                 <Ellipse.Style>
                     <Style TargetType="Ellipse">
@@ -43,8 +92,8 @@
                     </Style>
                 </Ellipse.Style>
             </Ellipse>
-            <TextBlock Text="OCR Server" VerticalAlignment="Center" Margin="0,0,20,0" FontSize="11" Foreground="#666"/>
-
+            <TextBlock Text="OCR Server" VerticalAlignment="Center" Margin="0,0,20,0"
+                       FontSize="11" Foreground="{StaticResource textSecondary}"/>
             <Ellipse Width="10" Height="10" Margin="0,0,5,0">
                 <Ellipse.Style>
                     <Style TargetType="Ellipse">
@@ -57,7 +106,8 @@
                     </Style>
                 </Ellipse.Style>
             </Ellipse>
-            <TextBlock Text="Translation Server" VerticalAlignment="Center" Margin="0,0,20,0" FontSize="11" Foreground="#666"/>
+            <TextBlock Text="Translation Server" VerticalAlignment="Center" Margin="0,0,20,0"
+                       FontSize="11" Foreground="{StaticResource textSecondary}"/>
             <Ellipse Width="10" Height="10" Margin="0,0,5,0">
                 <Ellipse.Style>
                     <Style TargetType="Ellipse">
@@ -70,8 +120,8 @@
                     </Style>
                 </Ellipse.Style>
             </Ellipse>
-            <TextBlock Text="Processing" VerticalAlignment="Center" FontSize="11" Foreground="#666"/>
+            <TextBlock Text="Processing" VerticalAlignment="Center" FontSize="11"
+                       Foreground="{StaticResource textSecondary}"/>
         </StatusBar>
     </Grid>
 </Window>
-
