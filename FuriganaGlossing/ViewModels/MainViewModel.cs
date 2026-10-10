@@ -107,7 +107,7 @@ namespace FuriganaGlossing.ViewModels
             sb.Append("<html><body style=\"font-family: 'Meiryo', 'MS PGothic', sans-serif; line-height: 2.2; padding: 60px 20px; background-color: #fdfdfd; display: flex; flex-direction: column; align-items: center; text-align: center;\">");
             
             // Japanese original text and furigana (Center, Large)
-            sb.Append("<div style=\"font-size: 40px; color: #000; margin-bottom: 40px;\">");
+            sb.Append("<div style=\"font-size: 25px; color: #000; margin-bottom: 25px;\">");
             if (FuriganaTokens.Any())
             {
                 foreach (var token in FuriganaTokens)
